@@ -1,0 +1,9 @@
+name: mmass-legacy
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=2.7.18
+  - numpy
+  - wxpython=4.0.7.post2
+  - libxcrypt
