@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<indexedmzML xmlns="http://psi.hupo.org/ms/mzml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://psi.hupo.org/ms/mzml http://psidev.info/files/ms/mzML/xsd/mzML1.1.2_idx.xsd">
+  <mzML xmlns="http://psi.hupo.org/ms/mzml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://psi.hupo.org/ms/mzml http://psidev.info/files/ms/mzML/xsd/mzML1.1.0.xsd" id="20250305_H3K4_iso766_IM_ECD2_20V" version="1.1.0">
+    <cvList count="2">
+      <cv id="MS" fullName="Proteomics Standards Initiative Mass Spectrometry Ontology" version="4.1.232" URI="https://raw.githubusercontent.com/HUPO-PSI/psi-ms-CV/master/psi-ms.obo"/>
+      <cv id="UO" fullName="Unit Ontology" version="releases/2026-01-16" URI="https://raw.githubusercontent.com/bio-ontology-research-group/unit-ontology/master/uo.obo"/>
+    </cvList>
+    <fileDescription>
+      <fileContent>
+        <cvParam cvRef="MS" accession="MS:1000580" name="MSn spectrum" value=""/>
+      </fileContent>
+      <sourceFileList count="10">
+        <sourceFile id="_func001.dat" name="_func001.dat" location="file://20250305_H3K4_iso766_IM_ECD2_20V.raw">
+          <cvParam cvRef="MS" accession="MS:1000769" name="Waters nativeID format" value=""/>
+          <cvParam cvRef="MS" accession="MS:1000526" name="Waters raw format" value=""/>
+          <cvParam cvRef="MS" accession="MS:1000569" name="SHA-1" value="286674191228af9ad8af28fc6c5ce18f6194b008"/>
+        </sourceFile>
+        <sourceFile id="_x0032_0250305_H3K4_iso766_IM_ECD2_20V.xml" name="20250305_H3K4_iso766_IM_ECD2_20V.xml" location="file://20250305_H3K4_iso766_IM_ECD2_20V.raw">
+          <cvParam cvRef="MS" accession="MS:1000824" name="no nativeID format" value=""/>
+          <cvParam cvRef="MS" accession="MS:1000569" name="SHA-1" value="0a4dd7c2211fd2f6b39eddf1d4f8dc228659cae3"/>
+        </sourceFile>
+        <sourceFile id="_extern.inf" name="_extern.inf" location="file://20250305_H3K4_iso766_IM_ECD2_20V.raw">
+          <cvParam cvRef="MS" accession="MS:1000824" name="no nativeID format" value=""/>
+          <cvParam cvRef="MS" accession="MS:1000569" name="SHA-1" value="e45bce59e9ade50cf0288a3cddb5a8b8e4225b0d"/>
+        </sourceFile>
+        <sourceFile id="_func001.cdt" name="_func001.cdt" location="file://20250305_H3K4_iso766_IM_ECD2_20V.raw">
+          <cvParam cvRef="MS" accession="MS:1000824" name="no nativeID format" value=""/>
+          <cvParam cvRef="MS" accession="MS:1000569" name="SHA-1" value="bda74376dec9f0f8f976eca4dddb9652bf9b88a6"/>
+        </sourceFile>
+        <sourceFile id="_func001.idx" name="_func001.idx" location="file://20250305_H3K4_iso766_IM_ECD2_20V.raw">
+          <cvParam cvRef="MS" accession="MS:1000824" name="no nativeID format" value=""/>
+          <cvParam cvRef="MS" accession="MS:1000569" name="SHA-1" value="8dfefc38324d1f82db0e60379bb42fcaf1d442ea"/>
+        </sourceFile>
+        <sourceFile id="_func001.ind" name="_func001.ind" location="file://20250305_H3K4_iso766_IM_ECD2_20V.raw">
+          <cvParam cvRef="MS" accession="MS:1000824" name="no nativeID format" value=""/>
+          <cvParam cvRef="MS" accession="MS:1000569" name="SHA-1" value="e81cac64aba6096217ba7f721d89c33582053dc1"/>
+        </sourceFile>
+        <sourceFile id="_func001.sts" name="_func001.sts" location="file://20250305_H3K4_iso766_IM_ECD2_20V.raw">
+          <cvParam cvRef="MS" accession="MS:1000824" name="no nativeID format" value=""/>
+          <cvParam cvRef="MS" accession="MS:1000569" name="SHA-1" value="93c37f333b0b37aa483f2019481b1ff2bab7fe78"/>
+        </sourceFile>
+        <sourceFile id="_func001_rawRanges.txt" name="_func001_rawRanges.txt" location="file://20250305_H3K4_iso766_IM_ECD2_20V.raw">
+          <cvParam cvRef="MS" accession="MS:1000824" name="no nativeID format" value=""/>
+          <cvParam cvRef="MS" accession="MS:1000569" name="SHA-1" value="19890364b17824c7d27531623abb2e258fcfc3a8"/>
+        </sourceFile>
+        <sourceFile id="_functns.inf" name="_functns.inf" location="file://20250305_H3K4_iso766_IM_ECD2_20V.raw">
+          <cvParam cvRef="MS" accession="MS:1000824" name="no nativeID format" value=""/>
+          <cvParam cvRef="MS" accession="MS:1000569" name="SHA-1" value="95924d99bd5703083806c5d49e93d4d02068221b"/>
+        </sourceFile>
+        <sourceFile id="_header.txt" name="_header.txt" location="file://20250305_H3K4_iso766_IM_ECD2_20V.raw">
+          <cvParam cvRef="MS" accession="MS:1000824" name="no nativeID format" value=""/>
+          <cvParam cvRef="MS" accession="MS:1000569" name="SHA-1" value="e444be39dce4697db2e774518497f2dd3fa9eed4"/>
+        </sourceFile>
+      </sourceFileList>
+    </fileDescription>
+    <softwareList count="2">
+      <software id="MassLynx" version="4.1">
+        <cvParam cvRef="MS" accession="MS:1000534" name="MassLynx" value=""/>
+      </software>
+      <software id="pwiz_Reader_Waters" version="3.0.26042">
+        <cvParam cvRef="MS" accession="MS:1000615" name="ProteoWizard software" value=""/>
+      </software>
+    </softwareList>
+    <instrumentConfigurationList count="1">
+      <instrumentConfiguration id="IC">
+        <cvParam cvRef="MS" accession="MS:1000126" name="Waters instrument model" value=""/>
+      </instrumentConfiguration>
+    </instrumentConfigurationList>
+    <dataProcessingList count="1">
+      <dataProcessing id="pwiz_Reader_Waters_conversion">
+        <processingMethod order="0" softwareRef="pwiz_Reader_Waters">
+          <cvParam cvRef="MS" accession="MS:1000544" name="Conversion to mzML" value=""/>
+        </processingMethod>
+      </dataProcessing>
+    </dataProcessingList>
+    <run id="_x0032_0250305_H3K4_iso766_IM_ECD2_20V" defaultInstrumentConfigurationRef="IC" startTimeStamp="2025-03-05T11:53:37Z" defaultSourceFileRef="_func001.dat">
+      <spectrumList count="16400" defaultDataProcessingRef="pwiz_Reader_Waters_conversion">
+        <spectrum index="10899" id="function=1 process=0 scan=10900" defaultArrayLength="107">
+          <cvParam cvRef="MS" accession="MS:1000580" name="MSn spectrum" value=""/>
+          <cvParam cvRef="MS" accession="MS:1000511" name="ms level" value="2"/>
+          <cvParam cvRef="MS" accession="MS:1000130" name="positive scan" value=""/>
+          <cvParam cvRef="MS" accession="MS:1000128" name="profile spectrum" value=""/>
+          <cvParam cvRef="MS" accession="MS:1000285" name="total ion current" value="97666.0"/>
+          <cvParam cvRef="MS" accession="MS:1000796" name="spectrum title" value="20250305_H3K4_iso766_IM_ECD2_20V.10900.10900. File:&quot;20250305_H3K4_iso766_IM_ECD2_20V.raw&quot;, NativeID:&quot;function=1 process=0 scan=10900&quot;"/>
+          <scanList count="1">
+            <cvParam cvRef="MS" accession="MS:1000795" name="no combination" value=""/>
+            <scan>
+              <cvParam cvRef="MS" accession="MS:1000616" name="preset scan configuration" value="1"/>
+              <cvParam cvRef="MS" accession="MS:1000016" name="scan start time" value="1.957980751991" unitCvRef="UO" unitAccession="UO:0000031" unitName="minute"/>
+              <cvParam cvRef="MS" accession="MS:1002476" name="ion mobility drift time" value="12.177122116089" unitCvRef="UO" unitAccession="UO:0000028" unitName="millisecond"/>
+              <scanWindowList count="1">
+                <scanWindow>
+                  <cvParam cvRef="MS" accession="MS:1000501" name="scan window lower limit" value="50.0" unitCvRef="MS" unitAccession="MS:1000040" unitName="m/z"/>
+                  <cvParam cvRef="MS" accession="MS:1000500" name="scan window upper limit" value="4000.0" unitCvRef="MS" unitAccession="MS:1000040" unitName="m/z"/>
+                </scanWindow>
+              </scanWindowList>
+            </scan>
+          </scanList>
+          <precursorList count="1">
+            <precursor>
+              <isolationWindow>
+                <cvParam cvRef="MS" accession="MS:1000827" name="isolation window target m/z" value="766.0" unitCvRef="MS" unitAccession="MS:1000040" unitName="m/z"/>
+              </isolationWindow>
+              <selectedIonList count="1">
+                <selectedIon>
+                  <cvParam cvRef="MS" accession="MS:1000744" name="selected ion m/z" value="766.0" unitCvRef="MS" unitAccession="MS:1000040" unitName="m/z"/>
+                </selectedIon>
+              </selectedIonList>
+              <activation>
+                <cvParam cvRef="MS" accession="MS:1000422" name="beam-type collision-induced dissociation" value=""/>
+                <cvParam cvRef="MS" accession="MS:1000045" name="collision energy" value="6.0" unitCvRef="UO" unitAccession="UO:0000266" unitName="electronvolt"/>
+              </activation>
+            </precursor>
+          </precursorList>
+          <binaryDataArrayList count="2">
+            <binaryDataArray encodedLength="456">
+              <cvParam cvRef="MS" accession="MS:1000523" name="64-bit float" value=""/>
+              <cvParam cvRef="MS" accession="MS:1000574" name="zlib compression" value=""/>
+              <cvParam cvRef="MS" accession="MS:1000514" name="m/z array" value="" unitCvRef="MS" unitAccession="MS:1000040" unitName="m/z"/>
+              <binary>eJwtzT0ohVEcx/GzKJMYZNPZZJEkr92ca7i4ynBF6i4niZJYlMFyLd7fUl42xyYLIwvPdlmQ5ZJ0D4OXRaEkJXK+/+nT939+T49Sylb9tBullJspH/pXbaHZxegQfd/YVHi3qIfQjKK7GJ4O5sS8+IQ6ezrzr71Al0OfF+98UD+ifUX3iebrnlYP7AtRl6CLvdMJtF0Y9UrXf7BrQd+GuulrNuxa0XRKd6NPHcyF79JoBtCPYGa5ZD7cN9Fvo403BlUSoxTaNLrjGJ1Fc4n+GjO1PbzHUCcw6kI12EuPop1AdTLGPYv2EvUNuvw692fxDdU3uo7JhfD/FNo0mgFUBadBXSSWodJoo188w8yVeIt6pXgx7LfEHXFPPO/HHGovvoil41iOpkKsRrU0jRuot8VdseGIfRwzSXTd0jrCSnQ1GDVL162u0ajiqBNoJlr2zR/0Vu0+</binary>
+            </binaryDataArray>
+            <binaryDataArray encodedLength="184">
+              <cvParam cvRef="MS" accession="MS:1000523" name="64-bit float" value=""/>
+              <cvParam cvRef="MS" accession="MS:1000574" name="zlib compression" value=""/>
+              <cvParam cvRef="MS" accession="MS:1000515" name="intensity array" value="" unitCvRef="MS" unitAccession="MS:1000131" unitName="number of detector counts"/>
+              <binary>eJyF0isKgEAYReGJRoPBYBARg4hBELX4BNflkl2CwftP0aNTBs7HwLycexvndM/B/MreI3CnHoIn6j34rt6CD+oNeKregdO5rA/guXoGXkEfrYPHdz8WcN33sYLTefz9g0c/XquX4H4duM6F/8Sc1v/t35zeuVCnd7F73b7dz4+B+7sAaWwY4A==</binary>
+            </binaryDataArray>
+          </binaryDataArrayList>
+        </spectrum>
+      </spectrumList>
+      <chromatogramList count="1" defaultDataProcessingRef="pwiz_Reader_Waters_conversion">
+        <chromatogram index="0" id="TIC" defaultArrayLength="82">
+          <cvParam cvRef="MS" accession="MS:1000235" name="total ion current chromatogram" value=""/>
+          <binaryDataArrayList count="3">
+            <binaryDataArray encodedLength="548">
+              <cvParam cvRef="MS" accession="MS:1000523" name="64-bit float" value=""/>
+              <cvParam cvRef="MS" accession="MS:1000574" name="zlib compression" value=""/>
+              <cvParam cvRef="MS" accession="MS:1000595" name="time array" value="" unitCvRef="UO" unitAccession="UO:0000031" unitName="minute"/>
+              <binary>eJwlz1sog2EYB/DXmMOFC4cUSXMIheIOtXySVhQXitwwNYckZRcuXOhzg6wcb6xGo5bU2oocyoWvRlaLyEZm1mcO42ts5jg29P6/q1//532e531fQghncWqqCCH6o85VKmcUNqisM2cX9cySPeSQ1QovVYdU0k5OqMrmhlMqU61zoF4mnCPnlDvRnzzqQl1id6MemuapfHDrGvOC24Nzv/SWKrssvsO5o+ke87YhL/Le0gO0WB/Rv+8XoCnNh3cb5E/Ii6pnzOk0frxf0RpAPvBBvoZ9Qf9OShDvqViB/HrlK+4vPYKsseMN9cJ3KDOMv2NOlvmBvGCGyvSaT2TtGWSTer+wdzICuYSZEPo0ed+ox26LDtf/YP+3G3KD6jD2vEoj+IdaKxoo/kW9m4P6m6Y/9Ld7IdsvJwzdUzQGiXAsas6IojJdKsjlm6DS8ym6XC2h6ts0kM12QM6VFY198z2QtKyJOTUsaq+NwdzsFGQaL0QTc6Wo2/ogP7EJOQWJhdI6yFvmxDxyBZVMQRzujx+IY/4B2a7A9w==</binary>
+            </binaryDataArray>
+            <binaryDataArray encodedLength="444">
+              <cvParam cvRef="MS" accession="MS:1000523" name="64-bit float" value=""/>
+              <cvParam cvRef="MS" accession="MS:1000574" name="zlib compression" value=""/>
+              <cvParam cvRef="MS" accession="MS:1000515" name="intensity array" value="" unitCvRef="MS" unitAccession="MS:1000131" unitName="number of detector counts"/>
+              <binary>eJwt0E8og3Ecx/EnNmkcZAeF2mMpkz85OCgHj5LIBU0tjc1lOUiTg5ue4jiHlbSDsoubgyL/klbKhWniMJdt/jSWqbU21Mq/7/s5vfp8v5/vU79HURSl0NXU/4ey+mQXvWly+wJZ68OdaQy1oM+Yq8b9aFYVr9rIk0HUO9A0iFqRnttj9G7I8yrZ6SUPreHZMB4lbWJAIzffkced5N0x9M5gym7c2/C5F2dz3OnGfMPo5S3od7Hf1BvFuUvsLjRwH8TTkzpx3VwrDlhrxPh3Fd9vxS+1WnRMoT9WwXvqLWLEXsl7l8rJmZL2r6vTJPl1xIyLZfzv+Kfsta28qPdgLGH4kRPDE2/skxkxVXoRVc8D99Ekvegje0tKjIQSzK3k1DbqHnrhlSK9nyy630WvJS0qgXs8iOLhNfc+IzvO8WIfl4/xdk/7BYd9ggw=</binary>
+            </binaryDataArray>
+            <binaryDataArray arrayLength="82" encodedLength="24">
+              <cvParam cvRef="MS" accession="MS:1000522" name="64-bit integer" value=""/>
+              <cvParam cvRef="MS" accession="MS:1000574" name="zlib compression" value=""/>
+              <cvParam cvRef="MS" accession="MS:1000786" name="non-standard data array" value="function" unitCvRef="UO" unitAccession="UO:0000186" unitName="dimensionless unit"/>
+              <binary>eJxjZIAAxlF6lB4ENABs6ABT</binary>
+            </binaryDataArray>
+          </binaryDataArrayList>
+        </chromatogram>
+      </chromatogramList>
+    </run>
+  </mzML>
+  <indexList count="2">
+    <index name="spectrum">
+      <offset idRef="function=1 process=0 scan=10900">61904624</offset>
+    </index>
+    <index name="chromatogram">
+      <offset idRef="TIC">84686777</offset>
+    </index>
+  </indexList>
+  <indexListOffset>84689493</indexListOffset>
+  <fileChecksum>fdeedcbce97fbfaf338613361b256eeed44173a5</fileChecksum>
+</indexedmzML>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mzData version="1.05">
+  <description>
+    <admin>
+      <sampleName>Test Sample</sampleName>
+      <contact>
+        <name>Test Operator</name>
+        <institution>Test Institution</institution>
+      </contact>
+    </admin>
+    <instrument>
+      <instrumentName>Test Instrument</instrumentName>
+    </instrument>
+  </description>
+  <spectrumList count="1">
+    <spectrum id="1">
+      <acqSpecification spectrumType="discrete" />
+      <spectrumInstrument msLevel="1" mzRangeStart="100.0" mzRangeStop="105.0" />
+      <mzArrayBinary><data precision="32" endian="network" length="6">QsgAAELKAABCzAAAQs4AAELQAABC0gAA</data></mzArrayBinary>
+      <intenArrayBinary><data precision="32" endian="network" length="6">RHoAAET6AABEu4AARZxAAER6AABCyAAA</data></intenArrayBinary>
+    </spectrum>
+  </spectrumList>
+</mzData>
