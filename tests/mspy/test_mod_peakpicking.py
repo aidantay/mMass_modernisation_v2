@@ -1,35 +1,13 @@
-# -------------------------------------------------------------------------
-#     Copyright (C) 2005-2013 Martin Strohalm <www.mmass.org>
-#
-#     This program is free software; you can redistribute it and/or modify
-#     it under the terms of the GNU General Public License as published by
-#     the Free Software Foundation; either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     This program is distributed in the hope that it will be useful,
-#     but WITHOUT ANY WARRANTY; without even the implied warranty of
-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#     GNU General Public License for more details.
-#
-#     Complete text of GNU GPL can be found in the file LICENSE.TXT in the
-#     main directory of the program.
-# -------------------------------------------------------------------------
-
 import pytest
 import numpy
-import copy
 from hypothesis import given, strategies as st, settings, HealthCheck
-try:
-    from unittest.mock import patch, MagicMock
-except ImportError:
-    from mock import patch, MagicMock
-import mod_peakpicking
-import mod_stopper
-import mod_signal
-import obj_peak
-import obj_peaklist
-import obj_compound
-import blocks
+import mspy.mod_peakpicking as mod_peakpicking
+import mspy.mod_stopper as mod_stopper
+import mspy.mod_signal as mod_signal
+import mspy.obj_peak as obj_peak
+import mspy.obj_peaklist as obj_peaklist
+import mspy.obj_compound as obj_compound
+import mspy.blocks as blocks
 
 
 # Module-level fixture to reset stopper state
@@ -2086,7 +2064,7 @@ def test_labelpeak_with_baseline_array_workaround():
 # 3. labelscan (lines 241->242, 242-253, 316->317, 317-328): baseline != None check fails
 #
 # These branches were verified as unreachable by test at Step 2:
-#   /home/aidantay/projects/mMass_modernisation_v2/.conda/bin/python -c "..."
+#   .conda/bin/python -c "..."
 #   Result: ERROR: ValueError: 'The truth value of an array with more than one element is ambiguous'
 #
 # Category B: ALGORITHMICALLY UNREACHABLE (6 branches)

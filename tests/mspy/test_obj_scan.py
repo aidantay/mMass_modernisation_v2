@@ -1,36 +1,15 @@
-# -------------------------------------------------------------------------
-#     Copyright (C) 2005-2013 Martin Strohalm <www.mmass.org>
-#
-#     This program is free software; you can redistribute it and/or modify
-#     it under the terms of the GNU General Public License as published by
-#     the Free Software Foundation; either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     This program is distributed in the hope that it will be useful,
-#     but WITHOUT ANY WARRANTY; without even the implied warranty of
-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#     GNU General Public License for more details.
-#
-#     Complete text of GNU GPL can be found in the file LICENSE.TXT in the
-#     main directory of the program.
-# -------------------------------------------------------------------------
-
 import pytest
 import numpy
 import copy
 from hypothesis import given, settings, HealthCheck
 import hypothesis.strategies as st
-try:
-    from unittest.mock import patch, MagicMock
-except ImportError:
-    from mock import patch, MagicMock
 
-import obj_scan
-import obj_peak
-import obj_peaklist
-import mod_signal
-import mod_peakpicking
-import mod_stopper
+import mspy.obj_scan as obj_scan
+import mspy.obj_peak as obj_peak
+import mspy.obj_peaklist as obj_peaklist
+import mspy.mod_signal as mod_signal
+import mspy.mod_peakpicking as mod_peakpicking
+import mspy.mod_stopper as mod_stopper
 
 
 # Module-level fixture to reset stopper state
@@ -350,12 +329,12 @@ class TestScanNoise:
         assert isinstance(result, tuple)
         assert len(result) == 2
 
-    def test_noise_delegates_to_mod_signal(self, profile_scan):
+    def test_noise_delegates_to_mod_signal(self, profile_scan, mocker):
         """noise() delegates to mod_signal.noise()."""
-        with patch('mod_signal.noise', return_value=(1.0, 0.5)) as mock_noise:
-            result = profile_scan.noise(minX=100.0, maxX=200.0)
-            mock_noise.assert_called_once()
-            assert result == (1.0, 0.5)
+        mock_noise = mocker.patch('mspy.mod_signal.noise', return_value=(1.0, 0.5))
+        result = profile_scan.noise(minX=100.0, maxX=200.0)
+        mock_noise.assert_called_once()
+        assert result == (1.0, 0.5)
 
     def test_noise_with_mz_parameter(self, profile_scan):
         """noise() accepts mz parameter."""
@@ -370,16 +349,16 @@ class TestScanNoise:
 class TestScanBaseline:
     """Test baseline() method with caching (B4)."""
 
-    def test_baseline_computed_when_none(self, profile_scan):
+    def test_baseline_computed_when_none(self, profile_scan, mocker):
         """B4-false: compute baseline when _baseline is None."""
         assert profile_scan._baseline is None
         # Use a non-array object to avoid the numpy comparison issue
         baseline_result = [100.0, 50.0]
-        with patch('mod_signal.baseline', return_value=baseline_result):
-            baseline = profile_scan.baseline(window=0.1, offset=0.0)
-            assert profile_scan._baseline is not None
+        mocker.patch('mspy.mod_signal.baseline', return_value=baseline_result)
+        baseline = profile_scan.baseline(window=0.1, offset=0.0)
+        assert profile_scan._baseline is not None
 
-    def test_baseline_cached_on_second_call(self):
+    def test_baseline_cached_on_second_call(self, mocker):
         """B4-true: return cached baseline on identical params."""
         s = obj_scan.scan(profile=make_profile([100.0, 200.0], [50.0, 100.0]))
         call_count = [0]
@@ -388,12 +367,12 @@ class TestScanBaseline:
             call_count[0] += 1
             return baseline_result
 
-        with patch('mod_signal.baseline', side_effect=mock_baseline_fn):
-            baseline1 = s.baseline(window=0.1, offset=0.0)
-            baseline2 = s.baseline(window=0.1, offset=0.0)
-            assert call_count[0] == 1  # Only called once due to caching
+        mocker.patch('mspy.mod_signal.baseline', side_effect=mock_baseline_fn)
+        baseline1 = s.baseline(window=0.1, offset=0.0)
+        baseline2 = s.baseline(window=0.1, offset=0.0)
+        assert call_count[0] == 1  # Only called once due to caching
 
-    def test_baseline_recomputed_on_window_change(self):
+    def test_baseline_recomputed_on_window_change(self, mocker):
         """B4-false: recompute when window changes."""
         s = obj_scan.scan(profile=make_profile([100.0, 200.0], [50.0, 100.0]))
         call_count = [0]
@@ -402,12 +381,12 @@ class TestScanBaseline:
             call_count[0] += 1
             return baseline_result
 
-        with patch('mod_signal.baseline', side_effect=mock_baseline_fn):
-            s.baseline(window=0.1, offset=0.0)
-            s.baseline(window=0.2, offset=0.0)
-            assert call_count[0] == 2  # Called twice due to window change
+        mocker.patch('mspy.mod_signal.baseline', side_effect=mock_baseline_fn)
+        s.baseline(window=0.1, offset=0.0)
+        s.baseline(window=0.2, offset=0.0)
+        assert call_count[0] == 2  # Called twice due to window change
 
-    def test_baseline_recomputed_on_offset_change(self):
+    def test_baseline_recomputed_on_offset_change(self, mocker):
         """B4-false: recompute when offset changes."""
         s = obj_scan.scan(profile=make_profile([100.0, 200.0], [50.0, 100.0]))
         call_count = [0]
@@ -416,29 +395,29 @@ class TestScanBaseline:
             call_count[0] += 1
             return baseline_result
 
-        with patch('mod_signal.baseline', side_effect=mock_baseline_fn):
-            s.baseline(window=0.1, offset=0.0)
-            s.baseline(window=0.1, offset=0.5)
-            assert call_count[0] == 2  # Called twice due to offset change
+        mocker.patch('mspy.mod_signal.baseline', side_effect=mock_baseline_fn)
+        s.baseline(window=0.1, offset=0.0)
+        s.baseline(window=0.1, offset=0.5)
+        assert call_count[0] == 2  # Called twice due to offset change
 
-    def test_baseline_params_stored(self):
+    def test_baseline_params_stored(self, mocker):
         """baseline() stores params for cache validation."""
         s = obj_scan.scan(profile=make_profile([100.0, 200.0], [50.0, 100.0]))
-        with patch('mod_signal.baseline', return_value=[100.0, 50.0]):
-            s.baseline(window=0.15, offset=0.25)
-            assert s._baselineParams['window'] == 0.15
-            assert s._baselineParams['offset'] == 0.25
+        mocker.patch('mspy.mod_signal.baseline', return_value=[100.0, 50.0])
+        s.baseline(window=0.15, offset=0.25)
+        assert s._baselineParams['window'] == 0.15
+        assert s._baselineParams['offset'] == 0.25
 
-    def test_baseline_call_count_with_caching(self):
+    def test_baseline_call_count_with_caching(self, mocker):
         """Verify call count with caching behavior."""
         s = obj_scan.scan(profile=make_profile([100.0, 200.0], [50.0, 100.0]))
         baseline_result = [100.0, 50.0]
-        with patch('mod_signal.baseline', side_effect=lambda **kw: baseline_result) as mock_bl:
-            s.baseline(window=0.1, offset=0.0)
-            s.baseline(window=0.1, offset=0.0)
-            s.baseline(window=0.1, offset=0.0)
-            # Should only call mod_signal.baseline once
-            assert mock_bl.call_count == 1
+        mock_bl = mocker.patch('mspy.mod_signal.baseline', side_effect=lambda **kw: baseline_result)
+        s.baseline(window=0.1, offset=0.0)
+        s.baseline(window=0.1, offset=0.0)
+        s.baseline(window=0.1, offset=0.0)
+        # Should only call mod_signal.baseline once
+        assert mock_bl.call_count == 1
 
 
 # ============================================================================
@@ -487,12 +466,12 @@ class TestScanNormalization:
 class TestScanIntensity:
     """Test intensity() method."""
 
-    def test_intensity_delegates_to_mod_signal(self, profile_scan):
+    def test_intensity_delegates_to_mod_signal(self, profile_scan, mocker):
         """intensity() delegates to mod_signal.intensity()."""
-        with patch('mod_signal.intensity', return_value=50.0) as mock_int:
-            result = profile_scan.intensity(mz=150.0)
-            mock_int.assert_called_once()
-            assert result == 50.0
+        mock_int = mocker.patch('mspy.mod_signal.intensity', return_value=50.0)
+        result = profile_scan.intensity(mz=150.0)
+        mock_int.assert_called_once()
+        assert result == 50.0
 
     def test_intensity_returns_float(self, profile_scan):
         """intensity() returns a float."""
@@ -507,12 +486,12 @@ class TestScanIntensity:
 class TestScanWidth:
     """Test width() method."""
 
-    def test_width_delegates_to_mod_signal(self, profile_scan):
+    def test_width_delegates_to_mod_signal(self, profile_scan, mocker):
         """width() delegates to mod_signal.width()."""
-        with patch('mod_signal.width', return_value=0.5) as mock_width:
-            result = profile_scan.width(mz=150.0, intensity=50.0)
-            mock_width.assert_called_once()
-            assert result == 0.5
+        mock_width = mocker.patch('mspy.mod_signal.width', return_value=0.5)
+        result = profile_scan.width(mz=150.0, intensity=50.0)
+        mock_width.assert_called_once()
+        assert result == 0.5
 
 
 # ============================================================================
@@ -527,25 +506,25 @@ class TestScanArea:
         area = empty_scan.area()
         assert area == 0.0
 
-    def test_area_with_profile(self, profile_scan):
+    def test_area_with_profile(self, profile_scan, mocker):
         """B9-false: compute area for non-empty profile."""
-        with patch('mod_signal.baseline', return_value=[100.0, 50.0]):
-            with patch('mod_signal.area', return_value=1000.0):
-                area = profile_scan.area()
-                assert isinstance(area, (float, numpy.floating))
+        mocker.patch('mspy.mod_signal.baseline', return_value=[100.0, 50.0])
+        mocker.patch('mspy.mod_signal.area', return_value=1000.0)
+        area = profile_scan.area()
+        assert isinstance(area, (float, numpy.floating))
 
-    def test_area_calls_baseline(self, profile_scan):
+    def test_area_calls_baseline(self, profile_scan, mocker):
         """area() retrieves baseline before calculating."""
-        with patch.object(profile_scan, 'baseline', return_value=numpy.array([])) as mock_bl:
-            profile_scan.area()
-            mock_bl.assert_called_once()
+        mock_bl = mocker.patch.object(profile_scan, 'baseline', return_value=numpy.array([]))
+        profile_scan.area()
+        mock_bl.assert_called_once()
 
-    def test_area_delegates_to_mod_signal(self, profile_scan):
+    def test_area_delegates_to_mod_signal(self, profile_scan, mocker):
         """area() delegates calculation to mod_signal.area()."""
-        with patch('mod_signal.area', return_value=1000.0) as mock_area:
-            result = profile_scan.area(minX=100.0, maxX=200.0)
-            mock_area.assert_called_once()
-            assert result == 1000.0
+        mock_area = mocker.patch('mspy.mod_signal.area', return_value=1000.0)
+        result = profile_scan.area(minX=100.0, maxX=200.0)
+        mock_area.assert_called_once()
+        assert result == 1000.0
 
 
 # ============================================================================
@@ -685,17 +664,17 @@ class TestScanCrop:
         profile_scan.crop(minX=150.0, maxX=250.0)
         assert profile_scan._baseline is None
 
-    def test_crop_delegates_to_mod_signal(self, profile_scan):
+    def test_crop_delegates_to_mod_signal(self, profile_scan, mocker):
         """crop() delegates profile crop to mod_signal."""
-        with patch('mod_signal.crop', return_value=numpy.array([])) as mock_crop:
-            profile_scan.crop(minX=150.0, maxX=250.0)
-            mock_crop.assert_called_once()
+        mock_crop = mocker.patch('mspy.mod_signal.crop', return_value=numpy.array([]))
+        profile_scan.crop(minX=150.0, maxX=250.0)
+        mock_crop.assert_called_once()
 
-    def test_crop_crops_peaklist(self, full_scan):
+    def test_crop_crops_peaklist(self, full_scan, mocker):
         """crop() calls peaklist.crop()."""
-        with patch.object(full_scan.peaklist, 'crop') as mock_crop:
-            full_scan.crop(minX=150.0, maxX=250.0)
-            mock_crop.assert_called_once()
+        mock_crop = mocker.patch.object(full_scan.peaklist, 'crop')
+        full_scan.crop(minX=150.0, maxX=250.0)
+        mock_crop.assert_called_once()
 
 
 # ============================================================================
@@ -715,11 +694,11 @@ class TestScanMultiply:
         """B11-false: empty profile doesn't error."""
         peaklist_scan.multiply(2.0)  # Should not raise
 
-    def test_multiply_scales_peaklist(self, full_scan):
+    def test_multiply_scales_peaklist(self, full_scan, mocker):
         """multiply() also scales peaklist."""
-        with patch.object(full_scan.peaklist, 'multiply') as mock_mul:
-            full_scan.multiply(2.0)
-            mock_mul.assert_called_once_with(2.0)
+        mock_mul = mocker.patch.object(full_scan.peaklist, 'multiply')
+        full_scan.multiply(2.0)
+        mock_mul.assert_called_once_with(2.0)
 
     def test_multiply_resets_buffers(self, profile_scan):
         """multiply() clears baseline cache."""
@@ -727,11 +706,11 @@ class TestScanMultiply:
         profile_scan.multiply(2.0)
         assert profile_scan._baseline is None
 
-    def test_multiply_delegates_profile_to_mod_signal(self, profile_scan):
+    def test_multiply_delegates_profile_to_mod_signal(self, profile_scan, mocker):
         """multiply() delegates profile scaling to mod_signal."""
-        with patch('mod_signal.multiply', return_value=numpy.array([])) as mock_mul:
-            profile_scan.multiply(2.0)
-            mock_mul.assert_called_once()
+        mock_mul = mocker.patch('mspy.mod_signal.multiply', return_value=numpy.array([]))
+        profile_scan.multiply(2.0)
+        mock_mul.assert_called_once()
 
 
 # ============================================================================
@@ -751,11 +730,11 @@ class TestScanNormalize:
         """B12-false: empty profile doesn't error."""
         peaklist_scan.normalize()  # Should not raise
 
-    def test_normalize_scales_peaklist(self, full_scan):
+    def test_normalize_scales_peaklist(self, full_scan, mocker):
         """B13-true: normalize peaks when non-empty."""
-        with patch.object(full_scan.peaklist, 'multiply') as mock_mul:
-            full_scan.normalize()
-            # peaklist.multiply gets called in normalize
+        mock_mul = mocker.patch.object(full_scan.peaklist, 'multiply')
+        full_scan.normalize()
+        # peaklist.multiply gets called in normalize
 
     def test_normalize_empty_peaklist_no_error(self, profile_scan):
         """B13-false: empty peaklist doesn't error."""
@@ -780,33 +759,33 @@ class TestScanCombine:
         with pytest.raises(TypeError):
             profile_scan.combine("not a scan")
 
-    def test_combine_profiles_when_available(self, profile_scan):
+    def test_combine_profiles_when_available(self, profile_scan, mocker):
         """B15-true: use profiles when available."""
         other = obj_scan.scan(profile=make_profile([400.0], [50.0]))
-        with patch('mod_signal.combine', return_value=numpy.array([])) as mock_comb:
-            profile_scan.combine(other)
-            mock_comb.assert_called_once()
+        mock_comb = mocker.patch('mspy.mod_signal.combine', return_value=numpy.array([]))
+        profile_scan.combine(other)
+        mock_comb.assert_called_once()
 
-    def test_combine_with_empty_other(self, profile_scan):
+    def test_combine_with_empty_other(self, profile_scan, mocker):
         """B15-true: combine even with empty other profile."""
         other = obj_scan.scan()
-        with patch('mod_signal.combine', return_value=numpy.array([])) as mock_comb:
-            profile_scan.combine(other)
-            mock_comb.assert_called_once()
+        mock_comb = mocker.patch('mspy.mod_signal.combine', return_value=numpy.array([]))
+        profile_scan.combine(other)
+        mock_comb.assert_called_once()
 
     def test_combine_empties_peaklist_when_using_profiles(self, full_scan):
         """combine() empties peaklist when combining profiles."""
         full_scan.combine(obj_scan.scan(profile=make_profile([400.0], [50.0])))
         assert len(full_scan.peaklist) == 0
 
-    def test_combine_peaklists_when_no_profiles(self):
+    def test_combine_peaklists_when_no_profiles(self, mocker):
         """B16-true: combine peaklists when profiles empty."""
         s1 = obj_scan.scan(peaklist=make_peaklist((100.0, 100.0)))
         s2 = obj_scan.scan(peaklist=make_peaklist((200.0, 50.0)))
 
-        with patch.object(s1.peaklist, 'combine') as mock_comb:
-            s1.combine(s2)
-            mock_comb.assert_called_once()
+        mock_comb = mocker.patch.object(s1.peaklist, 'combine')
+        s1.combine(s2)
+        mock_comb.assert_called_once()
 
     def test_combine_both_empty_no_op(self, empty_scan):
         """B16-false: no-op when both empty."""
@@ -833,12 +812,12 @@ class TestScanOverlay:
         with pytest.raises(TypeError):
             profile_scan.overlay("not a scan")
 
-    def test_overlay_profiles_when_available(self, profile_scan):
+    def test_overlay_profiles_when_available(self, profile_scan, mocker):
         """B18-true: use profiles when available."""
         other = obj_scan.scan(profile=make_profile([400.0], [50.0]))
-        with patch('mod_signal.overlay', return_value=numpy.array([])) as mock_ovly:
-            profile_scan.overlay(other)
-            mock_ovly.assert_called_once()
+        mock_ovly = mocker.patch('mspy.mod_signal.overlay', return_value=numpy.array([]))
+        profile_scan.overlay(other)
+        mock_ovly.assert_called_once()
 
     def test_overlay_empties_peaklist(self, full_scan):
         """overlay() empties peaklist when using profiles."""
@@ -871,12 +850,12 @@ class TestScanSubtract:
         with pytest.raises(TypeError):
             profile_scan.subtract("not a scan")
 
-    def test_subtract_both_profiles(self, profile_scan):
+    def test_subtract_both_profiles(self, profile_scan, mocker):
         """B20-true: subtract when both have profiles."""
         other = obj_scan.scan(profile=make_profile([100.0, 200.0, 300.0], [10.0, 20.0, 15.0]))
-        with patch('mod_signal.subtract', return_value=numpy.array([])) as mock_sub:
-            profile_scan.subtract(other)
-            mock_sub.assert_called_once()
+        mock_sub = mocker.patch('mspy.mod_signal.subtract', return_value=numpy.array([]))
+        profile_scan.subtract(other)
+        mock_sub.assert_called_once()
 
     def test_subtract_one_empty_no_op(self, profile_scan):
         """B20-false: no-op when one profile is empty."""
@@ -905,30 +884,30 @@ class TestScanSubtract:
 class TestScanSmooth:
     """Test smooth() method."""
 
-    def test_smooth_updates_profile(self, profile_scan):
+    def test_smooth_updates_profile(self, profile_scan, mocker):
         """smooth() updates profile data."""
-        with patch('mod_signal.smooth', return_value=numpy.array([])):
-            profile_scan.smooth(method='MA', window=0.5)
-            # Verify mod_signal.smooth was called
+        mocker.patch('mspy.mod_signal.smooth', return_value=numpy.array([]))
+        profile_scan.smooth(method='MA', window=0.5)
+        # Verify mod_signal.smooth was called
 
-    def test_smooth_empties_peaklist(self, full_scan):
+    def test_smooth_empties_peaklist(self, full_scan, mocker):
         """smooth() empties peaklist."""
-        with patch('mod_signal.smooth', return_value=numpy.array([])):
-            full_scan.smooth(method='MA', window=0.5)
-            assert len(full_scan.peaklist) == 0
+        mocker.patch('mspy.mod_signal.smooth', return_value=numpy.array([]))
+        full_scan.smooth(method='MA', window=0.5)
+        assert len(full_scan.peaklist) == 0
 
-    def test_smooth_resets_buffers(self, profile_scan):
+    def test_smooth_resets_buffers(self, profile_scan, mocker):
         """smooth() clears baseline cache."""
         profile_scan._baseline = numpy.array([1, 2, 3])
-        with patch('mod_signal.smooth', return_value=numpy.array([])):
-            profile_scan.smooth(method='MA', window=0.5)
-            assert profile_scan._baseline is None
+        mocker.patch('mspy.mod_signal.smooth', return_value=numpy.array([]))
+        profile_scan.smooth(method='MA', window=0.5)
+        assert profile_scan._baseline is None
 
-    def test_smooth_delegates_to_mod_signal(self, profile_scan):
+    def test_smooth_delegates_to_mod_signal(self, profile_scan, mocker):
         """smooth() delegates to mod_signal.smooth()."""
-        with patch('mod_signal.smooth', return_value=numpy.array([])) as mock_smooth:
-            profile_scan.smooth(method='MA', window=0.5, cycles=2)
-            mock_smooth.assert_called_once()
+        mock_smooth = mocker.patch('mspy.mod_signal.smooth', return_value=numpy.array([]))
+        profile_scan.smooth(method='MA', window=0.5, cycles=2)
+        mock_smooth.assert_called_once()
 
 
 # ============================================================================
@@ -944,12 +923,12 @@ class TestScanRecalibrate:
         profile_scan.recalibrate(linear_fn, params)
         # m/z values should be updated (but with identity function, same)
 
-    def test_recalibrate_delegates_to_peaklist(self, full_scan):
+    def test_recalibrate_delegates_to_peaklist(self, full_scan, mocker):
         """recalibrate() delegates peaklist calibration."""
         params = [1.0, 0.0]
-        with patch.object(full_scan.peaklist, 'recalibrate') as mock_recal:
-            full_scan.recalibrate(linear_fn, params)
-            mock_recal.assert_called_once()
+        mock_recal = mocker.patch.object(full_scan.peaklist, 'recalibrate')
+        full_scan.recalibrate(linear_fn, params)
+        mock_recal.assert_called_once()
 
     def test_recalibrate_resets_buffers(self, profile_scan):
         """recalibrate() clears baseline cache."""
@@ -969,33 +948,33 @@ class TestScanRecalibrate:
 class TestScanSubbase:
     """Test subbase() method."""
 
-    def test_subbase_modifies_profile(self, profile_scan):
+    def test_subbase_modifies_profile(self, profile_scan, mocker):
         """subbase() modifies profile data."""
-        with patch('mod_signal.subbase', return_value=numpy.array([])):
-            profile_scan.subbase()
-            # Profile updated
+        mocker.patch('mspy.mod_signal.subbase', return_value=numpy.array([]))
+        profile_scan.subbase()
+        # Profile updated
 
-    def test_subbase_empties_peaklist(self, full_scan):
+    def test_subbase_empties_peaklist(self, full_scan, mocker):
         """subbase() empties peaklist."""
-        with patch('mod_signal.subbase', return_value=numpy.array([])):
-            full_scan.subbase()
-            assert len(full_scan.peaklist) == 0
+        mocker.patch('mspy.mod_signal.subbase', return_value=numpy.array([]))
+        full_scan.subbase()
+        assert len(full_scan.peaklist) == 0
 
-    def test_subbase_resets_buffers(self):
+    def test_subbase_resets_buffers(self, mocker):
         """subbase() clears baseline cache."""
         s = obj_scan.scan(profile=make_profile([100.0, 200.0], [50.0, 100.0]))
         s._baseline = [1, 2, 3, 4]
-        with patch('mod_signal.baseline', return_value=[100.0, 50.0]):
-            with patch('mod_signal.subbase', return_value=numpy.array([[100.0, 40.0]])):
-                s.subbase()
-                assert s._baseline is None
+        mocker.patch('mspy.mod_signal.baseline', return_value=[100.0, 50.0])
+        mocker.patch('mspy.mod_signal.subbase', return_value=numpy.array([[100.0, 40.0]]))
+        s.subbase()
+        assert s._baseline is None
 
-    def test_subbase_calls_baseline(self, profile_scan):
+    def test_subbase_calls_baseline(self, profile_scan, mocker):
         """subbase() retrieves baseline first."""
-        with patch.object(profile_scan, 'baseline', return_value=numpy.array([])):
-            with patch('mod_signal.subbase', return_value=numpy.array([])):
-                profile_scan.subbase()
-                # baseline should have been called
+        mocker.patch.object(profile_scan, 'baseline', return_value=numpy.array([]))
+        mocker.patch('mspy.mod_signal.subbase', return_value=numpy.array([]))
+        profile_scan.subbase()
+        # baseline should have been called
 
 
 # ============================================================================
@@ -1005,39 +984,39 @@ class TestScanSubbase:
 class TestScanLabelscan:
     """Test labelscan() method."""
 
-    def test_labelscan_without_smoothing(self, gaussian_scan):
+    def test_labelscan_without_smoothing(self, gaussian_scan, mocker):
         """B21-false: labelscan without smoothing uses raw profile."""
-        with patch('mod_peakpicking.labelscan', return_value=obj_peaklist.peaklist()):
-            gaussian_scan.labelscan(smoothMethod=None)
-            # Raw profile used
+        mocker.patch('mspy.mod_peakpicking.labelscan', return_value=obj_peaklist.peaklist())
+        gaussian_scan.labelscan(smoothMethod=None)
+        # Raw profile used
 
-    def test_labelscan_with_smoothing(self, gaussian_scan):
+    def test_labelscan_with_smoothing(self, gaussian_scan, mocker):
         """B21-true: labelscan with smoothing pre-smooths profile."""
-        with patch('mod_signal.smooth', return_value=gaussian_scan.profile):
-            with patch('mod_peakpicking.labelscan', return_value=obj_peaklist.peaklist()):
-                gaussian_scan.labelscan(smoothMethod='MA', smoothWindow=0.2)
-                # Smoothing called
+        mocker.patch('mspy.mod_signal.smooth', return_value=gaussian_scan.profile)
+        mocker.patch('mspy.mod_peakpicking.labelscan', return_value=obj_peaklist.peaklist())
+        gaussian_scan.labelscan(smoothMethod='MA', smoothWindow=0.2)
+        # Smoothing called
 
-    def test_labelscan_empty_peaklist_returns_false(self, gaussian_scan):
+    def test_labelscan_empty_peaklist_returns_false(self, gaussian_scan, mocker):
         """B22-true: return False when mod_peakpicking returns None."""
-        with patch('mod_peakpicking.labelscan', return_value=None):
-            result = gaussian_scan.labelscan()
-            assert result is False
+        mocker.patch('mspy.mod_peakpicking.labelscan', return_value=None)
+        result = gaussian_scan.labelscan()
+        assert result is False
 
-    def test_labelscan_peaklist_returns_true(self, gaussian_scan):
+    def test_labelscan_peaklist_returns_true(self, gaussian_scan, mocker):
         """B22-false: return True when peaklist returned."""
         peaklist = obj_peaklist.peaklist()
-        with patch('mod_peakpicking.labelscan', return_value=peaklist):
-            result = gaussian_scan.labelscan()
-            assert result is True
+        mocker.patch('mspy.mod_peakpicking.labelscan', return_value=peaklist)
+        result = gaussian_scan.labelscan()
+        assert result is True
 
-    def test_labelscan_updates_peaklist(self, gaussian_scan):
+    def test_labelscan_updates_peaklist(self, gaussian_scan, mocker):
         """labelscan() updates scan peaklist on success."""
         peaks = make_peaks((500.0, 1000.0))
         peaklist = obj_peaklist.peaklist(peaks)
-        with patch('mod_peakpicking.labelscan', return_value=peaklist):
-            gaussian_scan.labelscan()
-            assert gaussian_scan.peaklist is peaklist
+        mocker.patch('mspy.mod_peakpicking.labelscan', return_value=peaklist)
+        gaussian_scan.labelscan()
+        assert gaussian_scan.peaklist is peaklist
 
 
 # ============================================================================
@@ -1047,33 +1026,33 @@ class TestScanLabelscan:
 class TestScanLabelpeak:
     """Test labelpeak() method."""
 
-    def test_labelpeak_in_range_returns_true(self, gaussian_scan):
+    def test_labelpeak_in_range_returns_true(self, gaussian_scan, mocker):
         """B23-false: return True when peak found."""
         peak = obj_peak.peak(500.0, 1000.0)
-        with patch('mod_peakpicking.labelpeak', return_value=peak):
-            result = gaussian_scan.labelpeak(mz=500.0)
-            assert result is True
+        mocker.patch('mspy.mod_peakpicking.labelpeak', return_value=peak)
+        result = gaussian_scan.labelpeak(mz=500.0)
+        assert result is True
 
-    def test_labelpeak_out_of_range_returns_false(self, gaussian_scan):
+    def test_labelpeak_out_of_range_returns_false(self, gaussian_scan, mocker):
         """B23-true: return False when no peak found."""
-        with patch('mod_peakpicking.labelpeak', return_value=None):
-            result = gaussian_scan.labelpeak(mz=1000.0)
-            assert result is False
+        mocker.patch('mspy.mod_peakpicking.labelpeak', return_value=None)
+        result = gaussian_scan.labelpeak(mz=1000.0)
+        assert result is False
 
-    def test_labelpeak_appends_peak_on_success(self, gaussian_scan):
+    def test_labelpeak_appends_peak_on_success(self, gaussian_scan, mocker):
         """labelpeak() appends peak to peaklist."""
         peak = obj_peak.peak(500.0, 1000.0)
-        with patch('mod_peakpicking.labelpeak', return_value=peak):
-            original_len = len(gaussian_scan.peaklist)
-            gaussian_scan.labelpeak(mz=500.0)
-            assert len(gaussian_scan.peaklist) == original_len + 1
+        mocker.patch('mspy.mod_peakpicking.labelpeak', return_value=peak)
+        original_len = len(gaussian_scan.peaklist)
+        gaussian_scan.labelpeak(mz=500.0)
+        assert len(gaussian_scan.peaklist) == original_len + 1
 
-    def test_labelpeak_calls_baseline(self, gaussian_scan):
+    def test_labelpeak_calls_baseline(self, gaussian_scan, mocker):
         """labelpeak() retrieves baseline."""
-        with patch.object(gaussian_scan, 'baseline', return_value=numpy.array([])):
-            with patch('mod_peakpicking.labelpeak', return_value=None):
-                gaussian_scan.labelpeak(mz=500.0)
-                # baseline called
+        mocker.patch.object(gaussian_scan, 'baseline', return_value=numpy.array([]))
+        mocker.patch('mspy.mod_peakpicking.labelpeak', return_value=None)
+        gaussian_scan.labelpeak(mz=500.0)
+        # baseline called
 
 
 # ============================================================================
@@ -1083,27 +1062,27 @@ class TestScanLabelpeak:
 class TestScanLabelpoint:
     """Test labelpoint() method."""
 
-    def test_labelpoint_valid_mz_returns_true(self, gaussian_scan):
+    def test_labelpoint_valid_mz_returns_true(self, gaussian_scan, mocker):
         """B24-false: return True when peak labeled."""
         peak = obj_peak.peak(500.0, 1000.0)
-        with patch('mod_peakpicking.labelpoint', return_value=peak):
-            result = gaussian_scan.labelpoint(mz=500.0)
-            assert result is True
+        mocker.patch('mspy.mod_peakpicking.labelpoint', return_value=peak)
+        result = gaussian_scan.labelpoint(mz=500.0)
+        assert result is True
 
-    def test_labelpoint_empty_profile_returns_false(self):
+    def test_labelpoint_empty_profile_returns_false(self, mocker):
         """B24-true: return False when labelpoint returns None."""
         s = obj_scan.scan(profile=make_profile([100.0, 200.0], [50.0, 100.0]))
-        with patch('mod_peakpicking.labelpoint', return_value=None):
-            result = s.labelpoint(mz=150.0)
-            assert result is False
+        mocker.patch('mspy.mod_peakpicking.labelpoint', return_value=None)
+        result = s.labelpoint(mz=150.0)
+        assert result is False
 
-    def test_labelpoint_appends_peak_on_success(self, gaussian_scan):
+    def test_labelpoint_appends_peak_on_success(self, gaussian_scan, mocker):
         """labelpoint() appends peak to peaklist."""
         peak = obj_peak.peak(500.0, 1000.0)
-        with patch('mod_peakpicking.labelpoint', return_value=peak):
-            original_len = len(gaussian_scan.peaklist)
-            gaussian_scan.labelpoint(mz=500.0)
-            assert len(gaussian_scan.peaklist) == original_len + 1
+        mocker.patch('mspy.mod_peakpicking.labelpoint', return_value=peak)
+        original_len = len(gaussian_scan.peaklist)
+        gaussian_scan.labelpoint(mz=500.0)
+        assert len(gaussian_scan.peaklist) == original_len + 1
 
 
 # ============================================================================
@@ -1113,22 +1092,22 @@ class TestScanLabelpoint:
 class TestScanPeaklistDelegators:
     """Test methods that delegate to peaklist."""
 
-    def test_deisotope_delegates(self, full_scan):
+    def test_deisotope_delegates(self, full_scan, mocker):
         """deisotope() delegates to peaklist."""
-        with patch.object(full_scan.peaklist, 'deisotope') as mock_deiso:
-            full_scan.deisotope(maxCharge=2)
-            mock_deiso.assert_called_once()
+        mock_deiso = mocker.patch.object(full_scan.peaklist, 'deisotope')
+        full_scan.deisotope(maxCharge=2)
+        mock_deiso.assert_called_once()
 
     def test_deconvolute_clears_profile(self, full_scan):
         """deconvolute() clears profile data."""
         full_scan.deconvolute()
         assert len(full_scan) == 0
 
-    def test_deconvolute_delegates_peaklist(self, full_scan):
+    def test_deconvolute_delegates_peaklist(self, full_scan, mocker):
         """deconvolute() delegates to peaklist."""
-        with patch.object(full_scan.peaklist, 'deconvolute') as mock_deconv:
-            full_scan.deconvolute()
-            mock_deconv.assert_called_once()
+        mock_deconv = mocker.patch.object(full_scan.peaklist, 'deconvolute')
+        full_scan.deconvolute()
+        mock_deconv.assert_called_once()
 
     def test_deconvolute_resets_buffers(self, full_scan):
         """deconvolute() clears baseline cache."""
@@ -1136,35 +1115,35 @@ class TestScanPeaklistDelegators:
         full_scan.deconvolute()
         assert full_scan._baseline is None
 
-    def test_consolidate_delegates(self, full_scan):
+    def test_consolidate_delegates(self, full_scan, mocker):
         """consolidate() delegates to peaklist."""
-        with patch.object(full_scan.peaklist, 'consolidate') as mock_cons:
-            full_scan.consolidate(window=0.5)
-            mock_cons.assert_called_once()
+        mock_cons = mocker.patch.object(full_scan.peaklist, 'consolidate')
+        full_scan.consolidate(window=0.5)
+        mock_cons.assert_called_once()
 
-    def test_remthreshold_delegates(self, full_scan):
+    def test_remthreshold_delegates(self, full_scan, mocker):
         """remthreshold() delegates to peaklist."""
-        with patch.object(full_scan.peaklist, 'remthreshold') as mock_rem:
-            full_scan.remthreshold(absThreshold=10.0)
-            mock_rem.assert_called_once()
+        mock_rem = mocker.patch.object(full_scan.peaklist, 'remthreshold')
+        full_scan.remthreshold(absThreshold=10.0)
+        mock_rem.assert_called_once()
 
-    def test_remshoulders_delegates(self, full_scan):
+    def test_remshoulders_delegates(self, full_scan, mocker):
         """remshoulders() delegates to peaklist."""
-        with patch.object(full_scan.peaklist, 'remshoulders') as mock_rem:
-            full_scan.remshoulders(window=2.5)
-            mock_rem.assert_called_once()
+        mock_rem = mocker.patch.object(full_scan.peaklist, 'remshoulders')
+        full_scan.remshoulders(window=2.5)
+        mock_rem.assert_called_once()
 
-    def test_remisotopes_delegates(self, full_scan):
+    def test_remisotopes_delegates(self, full_scan, mocker):
         """remisotopes() delegates to peaklist."""
-        with patch.object(full_scan.peaklist, 'remisotopes') as mock_rem:
-            full_scan.remisotopes()
-            mock_rem.assert_called_once()
+        mock_rem = mocker.patch.object(full_scan.peaklist, 'remisotopes')
+        full_scan.remisotopes()
+        mock_rem.assert_called_once()
 
-    def test_remuncharged_delegates(self, full_scan):
+    def test_remuncharged_delegates(self, full_scan, mocker):
         """remuncharged() delegates to peaklist."""
-        with patch.object(full_scan.peaklist, 'remuncharged') as mock_rem:
-            full_scan.remuncharged()
-            mock_rem.assert_called_once()
+        mock_rem = mocker.patch.object(full_scan.peaklist, 'remuncharged')
+        full_scan.remuncharged()
+        mock_rem.assert_called_once()
 
 
 # ============================================================================
@@ -1260,30 +1239,30 @@ class TestScanEdgeCases:
 class TestScanIntegration:
     """Integration tests for combined operations."""
 
-    def test_labelscan_then_normalize(self):
+    def test_labelscan_then_normalize(self, mocker):
         """Label peaks then normalize scan."""
         s = obj_scan.scan(profile=make_gaussian_profile())
         peaks = make_peaks((500.0, 1000.0))
         peaklist = obj_peaklist.peaklist(peaks)
 
-        with patch('mod_peakpicking.labelscan', return_value=peaklist):
-            s.labelscan()
-            assert s.haspeaks()
-            s.normalize()
-            assert s.haspeaks()
+        mocker.patch('mspy.mod_peakpicking.labelscan', return_value=peaklist)
+        s.labelscan()
+        assert s.haspeaks()
+        s.normalize()
+        assert s.haspeaks()
 
-    def test_baseline_then_area(self):
+    def test_baseline_then_area(self, mocker):
         """Get baseline then calculate area."""
         s = obj_scan.scan(profile=make_profile([100.0, 200.0], [50.0, 100.0]))
         baseline_result = [100.0, 50.0]
-        with patch('mod_signal.baseline', return_value=baseline_result):
-            with patch('mod_signal.area', return_value=1000.0):
-                baseline1 = s.baseline(window=0.1, offset=0.0)
-                area = s.area()
-                # Area should use the cached baseline
-                baseline2 = s.baseline(window=0.1, offset=0.0)
-                # Both calls should have been to cached values
-                assert s._baselineParams['window'] == 0.1
+        mocker.patch('mspy.mod_signal.baseline', return_value=baseline_result)
+        mocker.patch('mspy.mod_signal.area', return_value=1000.0)
+        baseline1 = s.baseline(window=0.1, offset=0.0)
+        area = s.area()
+        # Area should use the cached baseline
+        baseline2 = s.baseline(window=0.1, offset=0.0)
+        # Both calls should have been to cached values
+        assert s._baselineParams['window'] == 0.1
 
     def test_add_and_normalize(self):
         """Add two scans then normalize result."""
@@ -1293,19 +1272,19 @@ class TestScanIntegration:
         result.normalize()
         assert len(result) >= 0
 
-    def test_full_workflow(self):
+    def test_full_workflow(self, mocker):
         """Full workflow: create, smooth, label, denoise."""
         s = obj_scan.scan(profile=make_gaussian_profile())
 
         # Smooth
-        with patch('mod_signal.smooth', return_value=s.profile):
-            s.smooth(method='MA', window=0.2)
+        mocker.patch('mspy.mod_signal.smooth', return_value=s.profile)
+        s.smooth(method='MA', window=0.2)
 
         # Label
         peaks = make_peaks((500.0, 1000.0))
         peaklist = obj_peaklist.peaklist(peaks)
-        with patch('mod_peakpicking.labelscan', return_value=peaklist):
-            s.labelscan()
+        mocker.patch('mspy.mod_peakpicking.labelscan', return_value=peaklist)
+        s.labelscan()
 
         assert s.haspeaks()
         assert len(s) > 0

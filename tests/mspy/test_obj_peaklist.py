@@ -1,32 +1,10 @@
-# -------------------------------------------------------------------------
-#     Copyright (C) 2005-2013 Martin Strohalm <www.mmass.org>
-#
-#     This program is free software; you can redistribute it and/or modify
-#     it under the terms of the GNU General Public License as published by
-#     the Free Software Foundation; either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     This program is distributed in the hope that it will be useful,
-#     but WITHOUT ANY WARRANTY; without even the implied warranty of
-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#     GNU General Public License for more details.
-#
-#     Complete text of GNU GPL can be found in the file LICENSE.TXT in the
-#     main directory of the program.
-# -------------------------------------------------------------------------
-
 import pytest
-import copy
 from hypothesis import given, settings, HealthCheck
 import hypothesis.strategies as st
-try:
-    from unittest.mock import patch, MagicMock
-except ImportError:
-    from mock import patch, MagicMock
-import obj_peaklist
-import obj_peak
-import mod_peakpicking
-import mod_stopper
+import mspy.obj_peaklist as obj_peaklist
+import mspy.obj_peak as obj_peak
+import mspy.mod_peakpicking as mod_peakpicking
+import mspy.mod_stopper as mod_stopper
 
 
 # Module-level fixture to reset stopper state
@@ -736,25 +714,25 @@ class TestPeaklistDeisotope:
         pl.deisotope()
         assert len(pl) == 0
 
-    def test_deisotope_calls_mod_peakpicking(self):
+    def test_deisotope_calls_mod_peakpicking(self, mocker):
         """B19-false: calls mod_peakpicking.deisotope."""
         pl = make_peaklist((100, 100), (200, 50))
-        with patch('mod_peakpicking.deisotope') as mock_deiso:
-            pl.deisotope(maxCharge=2, mzTolerance=0.1)
-            mock_deiso.assert_called_once()
-            call_kwargs = mock_deiso.call_args[1]
-            assert call_kwargs['maxCharge'] == 2
-            assert call_kwargs['mzTolerance'] == 0.1
+        mock_deiso = mocker.patch('mspy.mod_peakpicking.deisotope')
+        pl.deisotope(maxCharge=2, mzTolerance=0.1)
+        mock_deiso.assert_called_once()
+        call_kwargs = mock_deiso.call_args[1]
+        assert call_kwargs['maxCharge'] == 2
+        assert call_kwargs['mzTolerance'] == 0.1
 
-    def test_deisotope_with_custom_params(self):
+    def test_deisotope_with_custom_params(self, mocker):
         """deisotope passes custom parameters."""
         pl = make_peaklist((100, 100))
-        with patch('mod_peakpicking.deisotope') as mock_deiso:
-            pl.deisotope(maxCharge=3, mzTolerance=0.2,
-                        intTolerance=0.3, isotopeShift=0.5)
-            call_kwargs = mock_deiso.call_args[1]
-            assert call_kwargs['maxCharge'] == 3
-            assert call_kwargs['mzTolerance'] == 0.2
+        mock_deiso = mocker.patch('mspy.mod_peakpicking.deisotope')
+        pl.deisotope(maxCharge=3, mzTolerance=0.2,
+                    intTolerance=0.3, isotopeShift=0.5)
+        call_kwargs = mock_deiso.call_args[1]
+        assert call_kwargs['maxCharge'] == 3
+        assert call_kwargs['mzTolerance'] == 0.2
 
 
 # ============================================================================
@@ -770,28 +748,28 @@ class TestPeaklistDeconvolute:
         pl.deconvolute()
         assert len(pl) == 0
 
-    def test_deconvolute_calls_mod_peakpicking(self):
+    def test_deconvolute_calls_mod_peakpicking(self, mocker):
         """B20-false: calls mod_peakpicking.deconvolute."""
         pl = make_peaklist((100, 100), (200, 50))
         mock_result = obj_peaklist.peaklist([make_peak(100.0, 100.0)])
-        with patch('mod_peakpicking.deconvolute') as mock_deconv:
-            mock_deconv.return_value = mock_result
-            pl.deconvolute(massType=0)
-            mock_deconv.assert_called_once()
-            call_kwargs = mock_deconv.call_args[1]
-            assert call_kwargs['massType'] == 0
+        mock_deconv = mocker.patch('mspy.mod_peakpicking.deconvolute')
+        mock_deconv.return_value = mock_result
+        pl.deconvolute(massType=0)
+        mock_deconv.assert_called_once()
+        call_kwargs = mock_deconv.call_args[1]
+        assert call_kwargs['massType'] == 0
 
-    def test_deconvolute_updates_peaks(self):
+    def test_deconvolute_updates_peaks(self, mocker):
         """deconvolute updates peaklist peaks."""
         pl = make_peaklist((100, 100), (200, 50))
         new_peaks = obj_peaklist.peaklist([
             make_peak(100.0, 100.0),
             make_peak(200.0, 50.0)
         ])
-        with patch('mod_peakpicking.deconvolute') as mock_deconv:
-            mock_deconv.return_value = new_peaks
-            pl.deconvolute()
-            assert len(pl) == 2
+        mock_deconv = mocker.patch('mspy.mod_peakpicking.deconvolute')
+        mock_deconv.return_value = new_peaks
+        pl.deconvolute()
+        assert len(pl) == 2
 
 
 # ============================================================================

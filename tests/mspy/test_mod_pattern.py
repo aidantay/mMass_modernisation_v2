@@ -1,28 +1,11 @@
-# -------------------------------------------------------------------------
-#     Copyright (C) 2005-2013 Martin Strohalm <www.mmass.org>
-#
-#     This program is free software; you can redistribute it and/or modify
-#     it under the terms of the GNU General Public License as published by
-#     the Free Software Foundation; either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     This program is distributed in the hope that it will be useful,
-#     but WITHOUT ANY WARRANTY; without even the implied warranty of
-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#     GNU General Public License for more details.
-#
-#     Complete text of GNU GPL can be found in the file LICENSE.TXT in the
-#     main directory of the program.
-# -------------------------------------------------------------------------
-
 import pytest
 import numpy
 from hypothesis import given, strategies as st, settings, HealthCheck
-import mod_pattern
-import mod_stopper
-import obj_peak
-import obj_peaklist
-import obj_compound
+import mspy.mod_pattern as mod_pattern
+import mspy.mod_stopper as mod_stopper
+import mspy.obj_peak as obj_peak
+import mspy.obj_peaklist as obj_peaklist
+import mspy.obj_compound as obj_compound
 
 
 # Module-level fixture to reset stopper state
@@ -185,7 +168,7 @@ def test_gaussian_returns_array(mocker):
     # Mock the calculations module
     mock_result = numpy.array([[100.0, 0.0], [100.01, 0.5], [100.02, 1.0]])
     mocker.patch(
-        'mod_pattern.calculations.signal_gaussian',
+        'mspy.mod_pattern.calculations.signal_gaussian',
         return_value=mock_result
     )
     result = mod_pattern.gaussian(100.0, 99.5, 100.5, fwhm=0.05, points=500)
@@ -197,7 +180,7 @@ def test_lorentzian_returns_array(mocker):
     """Test lorentzian delegates and returns array."""
     mock_result = numpy.array([[100.0, 0.0], [100.01, 0.5], [100.02, 1.0]])
     mocker.patch(
-        'mod_pattern.calculations.signal_lorentzian',
+        'mspy.mod_pattern.calculations.signal_lorentzian',
         return_value=mock_result
     )
     result = mod_pattern.lorentzian(100.0, 99.5, 100.5, fwhm=0.05, points=500)
@@ -208,7 +191,7 @@ def test_gausslorentzian_returns_array(mocker):
     """Test gausslorentzian delegates and returns array."""
     mock_result = numpy.array([[100.0, 0.0], [100.01, 0.5], [100.02, 1.0]])
     mocker.patch(
-        'mod_pattern.calculations.signal_gausslorentzian',
+        'mspy.mod_pattern.calculations.signal_gausslorentzian',
         return_value=mock_result
     )
     result = mod_pattern.gausslorentzian(100.0, 99.5, 100.5, fwhm=0.05, points=500)
@@ -223,15 +206,15 @@ def test_gausslorentzian_returns_array(mocker):
 def mock_profile_dependencies(mocker):
     """Mock all external dependencies for profile function."""
     mocker.patch(
-        'mod_pattern.calculations.signal_profile',
+        'mspy.mod_pattern.calculations.signal_profile',
         return_value=numpy.array([[100.0, 0.0], [100.05, 0.5], [100.1, 1.0]])
     )
     mocker.patch(
-        'mod_pattern.calculations.signal_profile_to_raster',
+        'mspy.mod_pattern.calculations.signal_profile_to_raster',
         return_value=numpy.array([[100.0, 0.0], [100.01, 0.3]])
     )
     mocker.patch(
-        'mod_pattern.mod_signal.subbase',
+        'mspy.mod_pattern.mod_signal.subbase',
         side_effect=lambda x, y: x  # return profile unchanged
     )
 
@@ -400,7 +383,7 @@ def mock_matchpattern_dependencies(mocker):
             return None
 
     mocker.patch(
-        'mod_pattern.mod_peakpicking.labelpeak',
+        'mspy.mod_pattern.mod_peakpicking.labelpeak',
         side_effect=labelpeak_side_effect
     )
 
@@ -484,16 +467,15 @@ def test_matchpattern_appends_zero_for_missing_peak(mock_matchpattern_dependenci
 def test_matchpattern_returns_none_if_basepeak_is_zero(mock_matchpattern_dependencies):
     """Test matchpattern returns None if basepeak is zero (MP-B11)."""
     # Create a mock that returns None for all peaks
-    import mod_pattern as mp
-    original_labelpeak = mp.mod_peakpicking.labelpeak
-    mp.mod_peakpicking.labelpeak = lambda **kwargs: None
+    original_labelpeak = mod_pattern.mod_peakpicking.labelpeak
+    mod_pattern.mod_peakpicking.labelpeak = lambda **kwargs: None
     try:
         signal = numpy.array([[100.0, 1000.0]])
         pattern = [[100.0, 1.0]]
         result = mod_pattern.matchpattern(signal, pattern)
         assert result is None
     finally:
-        mp.mod_peakpicking.labelpeak = original_labelpeak
+        mod_pattern.mod_peakpicking.labelpeak = original_labelpeak
 
 
 def test_matchpattern_normalizes_by_basepeak(mock_matchpattern_dependencies):
@@ -529,15 +511,15 @@ def mock_pattern_dependencies(mocker):
     """Mock external dependencies for pattern function."""
     # Mock profile, maxima, and centroid functions
     mocker.patch(
-        'mod_pattern.profile',
+        'mspy.mod_pattern.profile',
         return_value=numpy.array([[100.0, 0.0], [100.01, 0.5], [100.02, 1.0]])
     )
     mocker.patch(
-        'mod_pattern.mod_signal.maxima',
+        'mspy.mod_pattern.mod_signal.maxima',
         return_value=[[100.02, 1.0]]
     )
     mocker.patch(
-        'mod_pattern.mod_signal.centroid',
+        'mspy.mod_pattern.mod_signal.centroid',
         return_value=100.020
     )
 
@@ -717,7 +699,7 @@ def test_pattern_centroid_refine_within_threshold(mock_pattern_dependencies, moc
     mod_stopper.start()
     # Mock centroid to return value close to isotope m/z
     mocker.patch(
-        'mod_pattern.mod_signal.centroid',
+        'mspy.mod_pattern.mod_signal.centroid',
         return_value=100.0201  # within fwhm/100 = 0.001
     )
     result = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.01, real=True)
@@ -729,7 +711,7 @@ def test_pattern_centroid_refine_exceeds_threshold(mock_pattern_dependencies, mo
     mod_stopper.start()
     # Mock centroid to return value far from isotope m/z
     mocker.patch(
-        'mod_pattern.mod_signal.centroid',
+        'mspy.mod_pattern.mod_signal.centroid',
         return_value=100.05  # exceeds fwhm/100 = 0.001
     )
     result = mod_pattern.pattern('H2O', fwhm=0.1, threshold=0.01, real=True)

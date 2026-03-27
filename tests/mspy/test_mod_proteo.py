@@ -1,26 +1,9 @@
-# -------------------------------------------------------------------------
-#     Copyright (C) 2005-2013 Martin Strohalm <www.mmass.org>
-#
-#     This program is free software; you can redistribute it and/or modify
-#     it under the terms of the GNU General Public License as published by
-#     the Free Software Foundation; either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     This program is distributed in the hope that it will be useful,
-#     but WITHOUT ANY WARRANTY; without even the implied warranty of
-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#     GNU General Public License for more details.
-#
-#     Complete text of GNU GPL can be found in the file LICENSE.TXT in the
-#     main directory of the program.
-# -------------------------------------------------------------------------
-
 import pytest
 from hypothesis import given, strategies as st, settings, HealthCheck
-import mod_proteo
-import mod_stopper
-import obj_sequence
-import blocks
+import mspy.mod_proteo as mod_proteo
+import mspy.mod_stopper as mod_stopper
+import mspy.obj_sequence as obj_sequence
+import mspy.blocks as blocks
 
 
 # Helper function to create sequences as lists
